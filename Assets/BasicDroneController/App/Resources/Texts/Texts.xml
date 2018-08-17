@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<texts>
+
+  <!-- APP NAME -->
+  <text id="message.game.title">
+    <en>Basic Drone Controller</en>
+    <es>Basic Drone Controller</es>
+  </text>
+
+  <!-- COMMON TEXTS -->
+  <text id="message.cancel">
+    <en>Cancel</en>
+    <es>Cancelar</es>
+  </text>
+
+  <text id="message.error">
+    <en>Error</en>
+    <es>Error</es>
+  </text>
+
+  <text id="message.warning">
+    <en>Warning</en>
+    <es>Alerta</es>
+  </text>
+
+  <text id="message.info">
+    <en>Information</en>
+    <es>Informacion</es>
+  </text>
+
+  <text id="message.loading">
+    <en>Loading...</en>
+    <es>Cargando...</es>
+  </text>
+
+  <text id="message.connecting">
+    <en>Connecting...</en>
+    <es>Conectando...</es>
+  </text>
+
+  <text id="message.speed">
+    <en>Speed</en>
+    <es>Velocidad</es>
+  </text>
+
+  <text id="message.height">
+    <en>Height</en>
+    <es>Altura</es>
+  </text>
+
+  <text id="message.apply">
+    <en>Apply</en>
+    <es>Aplicar</es>
+  </text>
+
+  <text id="message.connect.drone">
+    <en>Connect with Drone</en>
+    <es>Conectar con Dron</es>
+  </text>
+
+  <text id="message.arm.drone">
+    <en>Arm the Drone</en>
+    <es>Armar el Dron</es>
+  </text>
+
+  <text id="message.takeoff.drone">
+    <en>Take Off Drone</en>
+    <es>Despegar el Drone</es>
+  </text>
+
+  <text id="message.operation.canceled">
+    <en>Operation canceled</en>
+    <es>Operacion cancelada</es>
+  </text>
+
+  <text id="message.do.you.want.exit">
+    <en>Do you want to exit the app?</en>
+    <es>Desea salir de la aplicacion?</es>
+  </text>
+
+  <text id="message.please.wait">
+    <en>Working. Please, wait...</en>
+    <es>Trabajando. Por favor, espere...</es>
+  </text>
+
+  <text id="message.basic.instructions.1.connect">
+    <en>First, press the button CONNECT to connect with the drone</en>
+    <es>Primero, aprieta el boton CONNECTAR para conectar con el drone</es>
+  </text>
+
+  <text id="message.basic.instructions.2.arm">
+    <en>Press the button ARM to arm the drone</en>
+    <es>Aprieta el boton ARMAR para armar el drone</es>
+  </text>
+
+  <text id="message.basic.instructions.3.takeoff">
+    <en>Press the button TAKE OFF to take off the drone to the desired HEIGHT</en>
+    <es>Aprieta el boton DESPEGAR para despegar el drone a la ALTURA deseada</es>
+  </text>
+
+  <text id="message.basic.instructions.3.now.takingoff">
+    <en>Now Taking Off!!</en>
+    <es>Despegando Ahora!!</es>
+  </text>
+
+  <text id="message.basic.instructions.4.velocity">
+    <en>Now you can press in the circle for the drone to go in that direction</en>
+    <es>Ahora puedes pressionar en el ciruclar para ir en esa direccion</es>
+  </text>
+
+  <text id="message.basic.instructions.5.flying">
+    <en>Flying for % seconds</en>
+    <es>Volando por % segundos</es>
+  </text>
+
+  <text id="message.basic.instructions.6.now.landing">
+    <en>Now Landing!!</en>
+    <es>Despegando Aterrizando!!</es>
+  </text>
+
+</texts>
+
+

@@ -1,0 +1,3 @@
+[submodule "Assets/BasicDroneController/Libraries/YourCommonTools"]
+	path = Assets/BasicDroneController/Libraries/YourCommonTools
+	url = https://github.com/EstebanGameDevelopment/YourCommonTools.git
