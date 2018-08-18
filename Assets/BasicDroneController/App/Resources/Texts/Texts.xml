@@ -43,6 +43,11 @@
     <es>Velocidad</es>
   </text>
 
+  <text id="message.time">
+    <en>Time moving:</en>
+    <es>Tiempo mover:</es>
+  </text>
+
   <text id="message.height">
     <en>Height</en>
     <es>Altura</es>
@@ -68,6 +73,11 @@
     <es>Despegar el Drone</es>
   </text>
 
+  <text id="message.land.drone">
+    <en>Land Drone</en>
+    <es>Aterrizar Drone</es>
+  </text>
+
   <text id="message.operation.canceled">
     <en>Operation canceled</en>
     <es>Operacion cancelada</es>
@@ -86,6 +96,11 @@
   <text id="message.basic.instructions.1.connect">
     <en>First, press the button CONNECT to connect with the drone</en>
     <es>Primero, aprieta el boton CONNECTAR para conectar con el drone</es>
+  </text>
+
+  <text id="message.basic.instructions.1.connecting.wait">
+    <en>Now connecting. Please, wait...</en>
+    <es>Conectando. Por favor, espere...</es>
   </text>
 
   <text id="message.basic.instructions.2.arm">
@@ -109,8 +124,8 @@
   </text>
 
   <text id="message.basic.instructions.5.flying">
-    <en>Flying for % seconds</en>
-    <es>Volando por % segundos</es>
+    <en>Flying for % seconds with velocity %</en>
+    <es>Volando por % segundos con velocidad %</es>
   </text>
 
   <text id="message.basic.instructions.6.now.landing">

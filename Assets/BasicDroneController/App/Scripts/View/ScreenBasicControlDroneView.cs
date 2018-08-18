@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using YourCommonTools;
 
@@ -51,6 +52,9 @@ namespace BasicDroneController
         private InputField m_speedInput;
         private GameObject m_applySpeed;
 
+        private InputField m_timeInput;
+        private GameObject m_applyTime;
+
         private InputField m_heightInput;
         private GameObject m_applyHeight;
 
@@ -60,11 +64,16 @@ namespace BasicDroneController
         private GameObject m_buttonOperation;
         private Operations m_operation;
 
+        private Vector2 m_vectorVelocity = Vector2.zero;
+
         // RADAR AREA
         private GameObject m_radarArea;
         private RectTransform m_rectRadarArea;
         private Vector2 m_centerPosition;
         private Vector2 m_sizeArea;
+        private bool m_pressedInArea = false;
+
+        private bool m_ignoreUpdate = false;
 
         // -------------------------------------------
         /* 
@@ -89,6 +98,15 @@ namespace BasicDroneController
             m_applySpeed.GetComponent<Button>().onClick.AddListener(ApplySpeed);
             m_applySpeed.SetActive(false);
 
+            m_container.Find("Time/Label").GetComponent<Text>().text = LanguageController.Instance.GetText("message.time");
+            m_timeInput = m_container.Find("Time/Value").GetComponent<InputField>();
+            m_timeInput.text = BasicDroneController.Instance.Time.ToString();
+            m_timeInput.onEndEdit.AddListener(OnChangeTime);
+            m_applyTime = m_container.Find("Time/Apply").gameObject;
+            m_applyTime.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.apply");
+            m_applyTime.GetComponent<Button>().onClick.AddListener(ApplyTime);
+            m_applyTime.SetActive(false);
+
             m_container.Find("Height/Label").GetComponent<Text>().text = LanguageController.Instance.GetText("message.height");
             m_heightInput = m_container.Find("Height/Value").GetComponent<InputField>();
             m_heightInput.text = BasicDroneController.Instance.Height.ToString();
@@ -100,7 +118,7 @@ namespace BasicDroneController
 
             // VEHICLES MODES
             m_modesVehicle = m_container.Find("Mode/ModeVehicle").GetComponent<Dropdown>();
-            m_modesVehicle.onValueChanged.AddListener(OnChangedModeVehicle);
+            m_modesVehicle.onValueChanged.AddListener(OnChangedModeVehicle);            
             m_modesVehicle.options = new List<Dropdown.OptionData>();
             for (int i = 0; i < OPERATION_MODES.Length; i++)
             {
@@ -142,18 +160,23 @@ namespace BasicDroneController
             switch (m_operation)
             {
                 case Operations.CONNECT:
+                    m_buttonOperation.SetActive(false);
+                    m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.1.connecting.wait");
                     DroneKitAndroidController.Instance.Initialitzation();
                     break;
 
                 case Operations.ARM:
+                    m_buttonOperation.SetActive(false);
                     DroneKitAndroidController.Instance.ArmDrone();
                     break;
 
                 case Operations.TAKEOFF:
+                    m_buttonOperation.SetActive(false);
                     DroneKitAndroidController.Instance.TakeOffDrone();
                     break;
 
                 case Operations.LAND:
+                    m_buttonOperation.SetActive(false);
                     DroneKitAndroidController.Instance.LandDrone();
                     break;
             }
@@ -176,6 +199,7 @@ namespace BasicDroneController
         {
             BasicDroneController.Instance.Height = float.Parse(m_heightInput.text);
             m_applyHeight.SetActive(false);
+            DroneKitAndroidController.Instance.ChangeAltitude(BasicDroneController.Instance.Height);
         }
 
         // -------------------------------------------
@@ -199,10 +223,30 @@ namespace BasicDroneController
 
         // -------------------------------------------
         /* 
+		 * ApplyTime
+		 */
+        private void ApplyTime()
+        {
+            BasicDroneController.Instance.Time = float.Parse(m_timeInput.text);
+            m_applyTime.SetActive(false);
+        }
+
+        // -------------------------------------------
+        /* 
+		 * OnChangeTime
+		 */
+        private void OnChangeTime(string _value)
+        {
+            m_applyTime.SetActive(true);
+        }
+
+        // -------------------------------------------
+        /* 
 		 * OnChangedModeVehicle
 		 */
         private void OnChangedModeVehicle(int _value)
         {
+            m_ignoreUpdate = true;
             m_applyVehicleMode.SetActive(true);
         }
 
@@ -215,6 +259,33 @@ namespace BasicDroneController
             int typeMode = INDEXES_MODES[m_modesVehicle.value];
             DroneKitAndroidController.Instance.SetModeOperation(typeMode);
             m_applyVehicleMode.SetActive(false);
+            m_ignoreUpdate = false;
+        }
+
+        // -------------------------------------------
+        /* 
+		 * UpdateModeVehicle
+		 */
+        private void UpdateModeVehicle()
+        {
+            if (m_ignoreUpdate)
+            {
+                return;
+            }
+
+            int typeMode = INDEXES_MODES[m_modesVehicle.value];
+            int vehicleMode = DroneKitAndroidController.Instance.GetVehicleMode();
+            if (vehicleMode != typeMode)
+            {
+                for (int i = 0; i < INDEXES_MODES.Length; i++)
+                {
+                    if (INDEXES_MODES[i] == vehicleMode)
+                    {
+                        m_modesVehicle.value = i;
+                        return;
+                    }
+                }
+            }
         }
 
         // -------------------------------------------
@@ -272,8 +343,21 @@ namespace BasicDroneController
 
                 Vector2 forward = new Vector2(forwardSignal.x, forwardSignal.y);
                 dotSignal.transform.localPosition = Vector2.zero + forward.normalized * (m_centerPosition.x * 1f);
-                dotSignal.transform.localScale = Vector3.one * (0.7f + (forwardSignal.y / 3));
+                dotSignal.transform.localScale = Vector3.one;
+
+                m_vectorVelocity = forward * BasicDroneController.Instance.Speed;
+                DroneKitAndroidController.Instance.RunVelocity(m_vectorVelocity.x, 0, m_vectorVelocity.y, false, BasicDroneController.Instance.Time);
+                DroneKitAndroidController.Instance.FlyDrone();
             }
+        }
+
+        // -------------------------------------------
+        /* 
+		 * OnPressedInArea
+		 */
+        public void OnPressedInArea()
+        {
+            m_pressedInArea = true;
         }
 
         // -------------------------------------------
@@ -287,31 +371,36 @@ namespace BasicDroneController
                 m_operation = Operations.ARM;
                 m_buttonOperation.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.arm.drone");
                 m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.2.arm");
+                m_buttonOperation.SetActive(true);
             }
             if (_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_ARMED)
             {
                 m_operation = Operations.TAKEOFF;
                 m_buttonOperation.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.takeoff.drone");
                 m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.3.takeoff");
+                m_buttonOperation.SetActive(true);
             }
             if (_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_TAKEN_OFF)
             {
                 m_operation = Operations.LAND;
                 m_buttonOperation.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.land.drone");
                 m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.3.now.takingoff");
+                m_buttonOperation.SetActive(true);
             }
             if (_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_READY)
             {
                 m_operation = Operations.LAND;
                 m_buttonOperation.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.land.drone");
                 m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.4.velocity");
+                m_buttonOperation.SetActive(true);
             }
             if ((_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_START_FLYING)
                 || (_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_FLYING))
             {
                 m_operation = Operations.LAND;
                 m_buttonOperation.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.land.drone");
-                m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.5.flying", (int)_list[0]);
+                m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.5.flying", (float)_list[0], m_vectorVelocity.ToString());
+                m_buttonOperation.SetActive(true);
             }
             if (_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_LANDING)
             {
@@ -323,6 +412,7 @@ namespace BasicDroneController
                 m_operation = Operations.ARM;
                 m_buttonOperation.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.arm.drone");
                 m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.2.arm");
+                m_buttonOperation.SetActive(true);
             }
         }
 
@@ -332,6 +422,29 @@ namespace BasicDroneController
          */
         void Update()
         {
+            UpdateModeVehicle();
+
+#if UNITY_EDITOR
+            if (true)
+#else
+            if (DroneKitAndroidController.Instance.TakeoffAltitudeReached)
+#endif
+            {
+                if (m_pressedInArea)
+                {
+                    m_pressedInArea = false;
+                    if (GameObject.Find("Dropdown List") == null)
+                    {
+                        Vector3 centerReal = m_radarArea.transform.position;
+                        
+                        Vector2 relPos = new Vector2(Input.mousePosition.x, Input.mousePosition.y) - new Vector2(centerReal.x, centerReal.y);
+                        if (relPos.magnitude * 1.4f < m_centerPosition.magnitude)
+                        {
+                            UIEventController.Instance.DispatchUIEvent(EVENT_BASICCONTROLDRONE_DISPLAY_DIRECTION_SIGNAL, relPos.normalized);
+                        }
+                    }
+                }
+            }
         }
     }
 }

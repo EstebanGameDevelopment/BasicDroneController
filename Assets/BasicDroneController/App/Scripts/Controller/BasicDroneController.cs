@@ -45,6 +45,7 @@ namespace BasicDroneController
         // PRIVATE MEMBERS
         // ----------------------------------------------	
         private float m_speed = 5f;
+        private float m_time = 5f;
         private float m_height = 10f;
 
         // ----------------------------------------------
@@ -55,6 +56,11 @@ namespace BasicDroneController
             get { return m_speed; }
             set { m_speed = value; }
         }
+        public float Time
+        {
+            get { return m_time; }
+            set { m_time = value; }
+        }        
         public float Height
         {
             get { return m_height; }
@@ -104,15 +110,6 @@ namespace BasicDroneController
 				_instance = null;
 			}
 		}
-
-        // -------------------------------------------
-        /* 
-		 * ConnectDrone
-		 */
-        public void ConnectDrone()
-        {
-            
-        }
 
         // -------------------------------------------
         /* 
