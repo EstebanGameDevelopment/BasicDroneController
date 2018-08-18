@@ -133,6 +133,11 @@
     <es>Despegando Aterrizando!!</es>
   </text>
 
+  <text id="message.there.has.been.problem.to.arm">
+    <en>There has been problems to arm the drone</en>
+    <es>Han habido problemas para armar el drone</es>
+  </text>
+
 </texts>
 
 

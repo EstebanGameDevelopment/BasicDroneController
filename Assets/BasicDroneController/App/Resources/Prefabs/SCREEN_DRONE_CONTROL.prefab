@@ -1377,6 +1377,7 @@ MonoBehaviour:
   SelectorGraphic: {fileID: 0}
   DotDirection: {fileID: 1485767987627678, guid: f6dc769f77ed96f4ca9d43ce2f349cb9,
     type: 2}
+  DotNext: {fileID: 1410049733255990, guid: 23688f12af6e9354ea6d5b22ad176e16, type: 2}
 --- !u!114 &114382453473572454
 MonoBehaviour:
   m_ObjectHideFlags: 1

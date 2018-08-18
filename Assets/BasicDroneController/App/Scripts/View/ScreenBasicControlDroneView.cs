@@ -40,6 +40,7 @@ namespace BasicDroneController
         // PUBLIC MEMBERS
         // ----------------------------------------------
         public GameObject DotDirection;
+        public GameObject DotNext;
 
         // ----------------------------------------------
         // PRIVATE MEMBERS
@@ -74,6 +75,9 @@ namespace BasicDroneController
         private bool m_pressedInArea = false;
 
         private bool m_ignoreUpdate = false;
+
+        private GameObject m_currentDotVelocity;
+        private GameObject m_nextDotVelocity;
 
         // -------------------------------------------
         /* 
@@ -117,6 +121,7 @@ namespace BasicDroneController
             m_applyHeight.SetActive(false);
 
             // VEHICLES MODES
+            m_container.Find("Mode").gameObject.SetActive(false);
             m_modesVehicle = m_container.Find("Mode/ModeVehicle").GetComponent<Dropdown>();
             m_modesVehicle.onValueChanged.AddListener(OnChangedModeVehicle);            
             m_modesVehicle.options = new List<Dropdown.OptionData>();
@@ -311,11 +316,49 @@ namespace BasicDroneController
 			return false;
 		}
 
-		// -------------------------------------------
-		/* 
+
+        // -------------------------------------------
+        /* 
+		 * CreateDotDirection
+		 */
+        private GameObject CreateDotDirection(GameObject _dot, Vector2 _forward, float _time)
+        {
+            GameObject dotVelocity = Utilities.AddChild(m_radarArea.transform, _dot);
+            GameObject.Destroy(dotVelocity, _time);
+
+            dotVelocity.transform.localPosition = Vector2.zero + _forward.normalized * (m_centerPosition.x * 1f);
+            dotVelocity.transform.localScale = Vector3.one;
+
+            return dotVelocity;
+        }
+
+        // -------------------------------------------
+        /* 
+		 * DestroyDotDirection
+		 */
+        private void DestroyDotDirection(GameObject _dotDirection)
+        {
+            if (_dotDirection != null)
+            {
+                GameObject.Destroy(_dotDirection);
+                _dotDirection = null;
+            }
+        }
+
+        // -------------------------------------------
+        /* 
+		 * OnPressedInArea
+		 */
+        public void OnPressedInArea()
+        {
+            m_pressedInArea = true;
+        }
+
+        // -------------------------------------------
+        /* 
 		 * OnUIEvent
 		 */
-		private void OnUIEvent(string _nameEvent, params object[] _list)
+        private void OnUIEvent(string _nameEvent, params object[] _list)
 		{
 			if (_nameEvent == ScreenController.EVENT_CONFIRMATION_POPUP)
 			{
@@ -337,27 +380,20 @@ namespace BasicDroneController
             if (_nameEvent == EVENT_BASICCONTROLDRONE_DISPLAY_DIRECTION_SIGNAL)
             {
                 Vector2 forwardSignal = (Vector2)_list[0];
-
-                GameObject dotSignal = Utilities.AddChild(m_radarArea.transform, DotDirection);
-                GameObject.Destroy(dotSignal, 5);
-
                 Vector2 forward = new Vector2(forwardSignal.x, forwardSignal.y);
-                dotSignal.transform.localPosition = Vector2.zero + forward.normalized * (m_centerPosition.x * 1f);
-                dotSignal.transform.localScale = Vector3.one;
-
                 m_vectorVelocity = forward * BasicDroneController.Instance.Speed;
-                DroneKitAndroidController.Instance.RunVelocity(m_vectorVelocity.x, 0, m_vectorVelocity.y, false, BasicDroneController.Instance.Time);
-                DroneKitAndroidController.Instance.FlyDrone();
-            }
-        }
 
-        // -------------------------------------------
-        /* 
-		 * OnPressedInArea
-		 */
-        public void OnPressedInArea()
-        {
-            m_pressedInArea = true;
+                if (DroneKitAndroidController.Instance.RunVelocity(m_vectorVelocity.x, 0, m_vectorVelocity.y, false, BasicDroneController.Instance.Time))
+                {
+                    DestroyDotDirection(m_nextDotVelocity);
+                    DroneKitAndroidController.Instance.FlyDrone();
+                }
+                else
+                {
+                    DestroyDotDirection(m_nextDotVelocity);
+                    m_nextDotVelocity = CreateDotDirection(DotNext, forward, 1000);
+                }
+            }
         }
 
         // -------------------------------------------
@@ -366,8 +402,19 @@ namespace BasicDroneController
 		 */
         private void OnBasicSystemEvent(string _nameEvent, object[] _list)
         {
+            if (_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_DISCONNECTED)
+            {
+                m_operation = Operations.CONNECT;
+                m_buttonOperation.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.connect.drone");
+                m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.1.connect");
+                m_buttonOperation.SetActive(true);
+            }
             if (_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_CONNECTED)
             {
+                if (_list.Length > 0)
+                {
+                    BasicDroneController.Instance.CreateNewInformationScreen(ScreenInformationView.SCREEN_INFORMATION, UIScreenTypePreviousAction.KEEP_CURRENT_SCREEN, LanguageController.Instance.GetText("message.error"), LanguageController.Instance.GetText("message.there.has.been.problem.to.arm"), null, "");
+                }
                 m_operation = Operations.ARM;
                 m_buttonOperation.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.arm.drone");
                 m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.2.arm");
@@ -386,6 +433,7 @@ namespace BasicDroneController
                 m_buttonOperation.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.land.drone");
                 m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.3.now.takingoff");
                 m_buttonOperation.SetActive(true);
+                m_container.Find("Mode").gameObject.SetActive(true);
             }
             if (_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_READY)
             {
@@ -393,19 +441,38 @@ namespace BasicDroneController
                 m_buttonOperation.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.land.drone");
                 m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.4.velocity");
                 m_buttonOperation.SetActive(true);
+                m_container.Find("Mode").gameObject.SetActive(true);
             }
             if ((_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_START_FLYING)
                 || (_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_FLYING))
             {
                 m_operation = Operations.LAND;
+                int timeRemaining = (int)((float)_list[0]);
                 m_buttonOperation.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.land.drone");
-                m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.5.flying", (float)_list[0], m_vectorVelocity.ToString());
+                m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.5.flying", timeRemaining, m_vectorVelocity.ToString());
+                if (_list.Length > 1)
+                {
+                    Vector3 forward = (Vector3)_list[1];
+                    Vector3 forward2D = new Vector2(forward.x, forward.z);
+                    DestroyDotDirection(m_nextDotVelocity);
+                    DestroyDotDirection(m_currentDotVelocity);
+                    m_currentDotVelocity = CreateDotDirection(DotDirection, forward2D.normalized, 1000);
+                }
+                if (m_currentDotVelocity != null)
+                {
+                    m_currentDotVelocity.transform.Find("Text").GetComponent<Text>().text = timeRemaining.ToString();
+                }
+                if (timeRemaining == 0)
+                {
+                    DestroyDotDirection(m_currentDotVelocity);
+                }
                 m_buttonOperation.SetActive(true);
             }
             if (_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_LANDING)
             {
                 m_buttonOperation.SetActive(false);
                 m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.6.now.landing");
+                m_container.Find("Mode").gameObject.SetActive(false);
             }
             if (_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_LANDED)
             {
@@ -413,6 +480,7 @@ namespace BasicDroneController
                 m_buttonOperation.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.arm.drone");
                 m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.2.arm");
                 m_buttonOperation.SetActive(true);
+                m_container.Find("Mode").gameObject.SetActive(false);
             }
         }
 
