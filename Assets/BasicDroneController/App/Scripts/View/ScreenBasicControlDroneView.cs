@@ -470,6 +470,8 @@ namespace BasicDroneController
             }
             if (_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_LANDING)
             {
+                DestroyDotDirection(m_nextDotVelocity);
+                DestroyDotDirection(m_currentDotVelocity);
                 m_buttonOperation.SetActive(false);
                 m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.6.now.landing");
                 m_container.Find("Mode").gameObject.SetActive(false);

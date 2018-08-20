@@ -382,25 +382,23 @@ public class ControlDroneDronekit  extends Activity implements DroneListener, To
     }
 
     public void landModeDrone() {
-        if (getFlyingDrone()) {
-            // Land
-            VehicleApi.getApi(this.drone).setVehicleMode(VehicleMode.COPTER_LAND, new AbstractCommandListener() {
-                @Override
-                public void onSuccess() {
-                    landingState = COMMAND_STATE_SUCCESS;
-                }
+        // Land
+        VehicleApi.getApi(this.drone).setVehicleMode(VehicleMode.COPTER_LAND, new AbstractCommandListener() {
+            @Override
+            public void onSuccess() {
+                landingState = COMMAND_STATE_SUCCESS;
+            }
 
-                @Override
-                public void onError(int executionError) {
-                    landingState = COMMAND_STATE_ERROR;
-                }
+            @Override
+            public void onError(int executionError) {
+                landingState = COMMAND_STATE_ERROR;
+            }
 
-                @Override
-                public void onTimeout() {
-                    landingState = COMMAND_STATE_TIMEOUT;
-                }
-            });
-        }
+            @Override
+            public void onTimeout() {
+                landingState = COMMAND_STATE_TIMEOUT;
+            }
+        });
     }
 
     public void guidedModeDrone()
