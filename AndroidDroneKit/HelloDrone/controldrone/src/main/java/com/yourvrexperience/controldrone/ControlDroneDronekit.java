@@ -275,6 +275,16 @@ public class ControlDroneDronekit  extends Activity implements DroneListener, To
         return droneAltitude.getAltitude();
     }
 
+    public double getLatitude() {
+        Gps gpsData = this.drone.getAttribute(AttributeType.GPS);
+        return (float)gpsData.getPosition().getLatitude();
+    }
+
+    public double getLongitude() {
+        Gps gpsData = this.drone.getAttribute(AttributeType.GPS);
+        return (float)gpsData.getPosition().getLongitude();
+    }
+
     public float getSpeed() {
         Speed droneSpeed = this.drone.getAttribute(AttributeType.SPEED);
         return (float)droneSpeed.getAirSpeed();
@@ -525,18 +535,19 @@ public class ControlDroneDronekit  extends Activity implements DroneListener, To
         return forward;
     }
 
-    public boolean setGoToDrone(float _vx, float _vy, float _vz, float _speed, float _distance) {
+    public boolean setGoToDrone(float _latitude, float _longitude, float _speed) {
         if (getFlyingDrone()) {
+
+            // SET SPEED M/S
+            Speed droneSpeed = this.drone.getAttribute(AttributeType.SPEED);
+            droneSpeed.setAirSpeed(_speed);
 
             // GET CURRENT LATITUDE,LONGITUDE
             Gps gpsData = this.drone.getAttribute(AttributeType.GPS);
             float latitude = (float)gpsData.getPosition().getLatitude();
             float longitude = (float)gpsData.getPosition().getLongitude();
 
-            GimbalApi.GimbalOrientation forwardDrone = GimbalApi.getApi(this.drone).getGimbalOrientation();
-            Point3D forwardVector = getForwardVector(forwardDrone.getPitch(), forwardDrone.getYaw());
-
-            LatLong newPosition = new LatLong(latitude + 2, longitude);
+            LatLong newPosition = new LatLong(_latitude, _longitude);
             ControlApi.getApi(this.drone).goTo(newPosition, true, new AbstractCommandListener() {
                 @Override
                 public void onSuccess() {
