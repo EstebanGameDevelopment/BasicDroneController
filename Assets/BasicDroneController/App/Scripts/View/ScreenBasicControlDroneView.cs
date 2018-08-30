@@ -141,6 +141,7 @@ namespace BasicDroneController
             // RADAR AREA
             m_radarArea = m_container.Find("RadarArea").gameObject;
             m_rectRadarArea = m_radarArea.transform.GetComponent<RectTransform>();
+            m_radarArea.GetComponent<Button>().onClick.AddListener(OnPressedInArea);
             m_centerPosition = new Vector2(m_rectRadarArea.sizeDelta.x / 2, m_rectRadarArea.sizeDelta.y / 2);
 
             // BUTTON BASIC OPERATION
@@ -508,10 +509,7 @@ namespace BasicDroneController
                         Vector3 centerReal = m_radarArea.transform.position;
                         
                         Vector2 relPos = new Vector2(Input.mousePosition.x, Input.mousePosition.y) - new Vector2(centerReal.x, centerReal.y);
-                        if (relPos.magnitude * 1.4f < m_centerPosition.magnitude)
-                        {
-                            UIEventController.Instance.DispatchUIEvent(EVENT_BASICCONTROLDRONE_DISPLAY_DIRECTION_SIGNAL, relPos.normalized);
-                        }
+                        UIEventController.Instance.DispatchUIEvent(EVENT_BASICCONTROLDRONE_DISPLAY_DIRECTION_SIGNAL, relPos.normalized);
                     }
                 }
             }
