@@ -71,7 +71,7 @@ public class ControlDroneDronekit  extends Activity implements DroneListener, To
     private ControlTower controlTower;
 
     private int portNumber = 14550;
-    private int heightDroneTakeOff = 10;
+    private float heightDroneTakeOff = 1.5f;
     private Drone drone;
     private int droneType = Type.TYPE_UNKNOWN;
     private final Handler handler = new Handler();
@@ -84,7 +84,7 @@ public class ControlDroneDronekit  extends Activity implements DroneListener, To
 
     private int eventDrone = -2;
 
-    public void initControlDrone(int _portNumber, int _heightDroneTakeOff) {
+    public void initControlDrone(int _portNumber, float _heightDroneTakeOff) {
 
         portNumber = _portNumber;
         heightDroneTakeOff = _heightDroneTakeOff;
