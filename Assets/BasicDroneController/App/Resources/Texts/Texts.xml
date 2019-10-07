@@ -53,6 +53,26 @@
     <es>Altura</es>
   </text>
 
+  <text id="message.port.number">
+    <en>Port</en>
+    <es>Port</es>
+  </text>
+
+  <text id="message.rtl">
+    <en>RTL</en>
+    <es>RTL</es>
+  </text>
+
+  <text id="message.ip.address">
+    <en>IP Address</en>
+    <es>IP Address</es>
+  </text>
+
+  <text id="message.land">
+    <en>Land</en>
+    <es>Land</es>
+  </text>
+
   <text id="message.apply">
     <en>Apply</en>
     <es>Aplicar</es>

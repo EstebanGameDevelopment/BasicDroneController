@@ -59,11 +59,19 @@ namespace BasicDroneController
         private InputField m_heightInput;
         private GameObject m_applyHeight;
 
+        private InputField m_portNumberInput;
+        private GameObject m_applyPortNumber;
+
+        private InputField m_ipAddressInput;
+        private GameObject m_applyIPAddress;
+
         private Dropdown m_modesVehicle;
         private GameObject m_applyVehicleMode;
 
         private GameObject m_buttonOperation;
         private Operations m_operation;
+
+        private GameObject m_buttonRTL;
 
         private Vector2 m_vectorVelocity = Vector2.zero;
 
@@ -120,6 +128,29 @@ namespace BasicDroneController
             m_applyHeight.GetComponent<Button>().onClick.AddListener(ApplyHeight);
             m_applyHeight.SetActive(false);
 
+            m_container.Find("PortNumber/Label").GetComponent<Text>().text = LanguageController.Instance.GetText("message.port.number");
+            m_portNumberInput = m_container.Find("PortNumber/Value").GetComponent<InputField>();
+            m_portNumberInput.text = BasicDroneController.Instance.Port.ToString();
+            m_portNumberInput.onEndEdit.AddListener(OnChangePortNumber);
+            m_applyPortNumber = m_container.Find("PortNumber/Apply").gameObject;
+            m_applyPortNumber.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.apply");
+            m_applyPortNumber.GetComponent<Button>().onClick.AddListener(ApplyPortNumber);
+            m_applyPortNumber.SetActive(false);
+
+            m_container.Find("IPDrone/Label").GetComponent<Text>().text = LanguageController.Instance.GetText("message.ip.address");
+            m_ipAddressInput = m_container.Find("IPDrone/Value").GetComponent<InputField>();
+            m_ipAddressInput.text = BasicDroneController.Instance.IPDrone;
+            m_ipAddressInput.onEndEdit.AddListener(OnChangeIPAddress);
+            m_applyIPAddress = m_container.Find("IPDrone/Apply").gameObject;
+            m_applyIPAddress.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.apply");
+            m_applyIPAddress.GetComponent<Button>().onClick.AddListener(ApplyIPAddress);
+            m_applyIPAddress.SetActive(false);
+
+            m_buttonRTL = m_container.Find("RTL").gameObject;
+            m_buttonRTL.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.rtl");
+            m_buttonRTL.GetComponent<Button>().onClick.AddListener(ApplyActionRTL);
+            m_buttonRTL.SetActive(true);
+
             // VEHICLES MODES
             m_container.Find("Mode").gameObject.SetActive(false);
             m_modesVehicle = m_container.Find("Mode/ModeVehicle").GetComponent<Dropdown>();
@@ -155,7 +186,7 @@ namespace BasicDroneController
 
             UIEventController.Instance.UIEvent += new UIEventHandler(OnUIEvent);
             BasicSystemEventController.Instance.BasicSystemEvent += new BasicSystemEventHandler(OnBasicSystemEvent);
-		}
+        }
 
         // -------------------------------------------
         /* 
@@ -168,12 +199,20 @@ namespace BasicDroneController
                 case Operations.CONNECT:
                     m_buttonOperation.SetActive(false);
                     m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.1.connecting.wait");
-                    DroneKitAndroidController.Instance.Initialitzation();
+#if ENABLE_DRONEANDROIDCONTROLLER
+                    DroneKitAndroidController.Instance.Initialitzation(false, BasicDroneController.Instance.IPDrone, BasicDroneController.Instance.Port, BasicDroneController.Instance.Height);
+#elif ENABLE_WEBSOCKET_DRONEKIT
+                    WebSocketDroneKitController.Instance.Connect(BasicDroneController.Instance.IPDrone + ":8080" );
+#endif
                     break;
 
                 case Operations.ARM:
                     m_buttonOperation.SetActive(false);
+#if ENABLE_DRONEANDROIDCONTROLLER
                     DroneKitAndroidController.Instance.ArmDrone();
+#elif ENABLE_WEBSOCKET_DRONEKIT
+                    WebSocketDroneKitController.Instance.ArmDrone();
+#endif
                     break;
 
                 case Operations.TAKEOFF:
@@ -266,6 +305,67 @@ namespace BasicDroneController
             DroneKitAndroidController.Instance.SetModeOperation(typeMode);
             m_applyVehicleMode.SetActive(false);
             m_ignoreUpdate = false;
+        }
+
+        // -------------------------------------------
+        /* 
+		 * OnChangePortNumber
+		 */
+        private void OnChangePortNumber(string arg0)
+        {
+            m_applyPortNumber.SetActive(true);
+        }
+
+        // -------------------------------------------
+        /* 
+		 * ApplyPortNumber
+		 */
+        private void ApplyPortNumber()
+        {
+            BasicDroneController.Instance.Port = int.Parse(m_portNumberInput.text);
+            m_applyPortNumber.SetActive(false);
+        }
+
+        // -------------------------------------------
+        /* 
+		 * OnChangeIPAddress
+		 */
+        private void OnChangeIPAddress(string arg0)
+        {
+            m_applyIPAddress.SetActive(true);
+        }
+
+        // -------------------------------------------
+        /* 
+		 * ApplyIPAddress
+		 */
+        private void ApplyIPAddress()
+        {
+            BasicDroneController.Instance.IPDrone = m_ipAddressInput.text;
+            m_applyIPAddress.SetActive(false);
+        }
+
+
+        // -------------------------------------------
+        /* 
+		 * ApplyActionRTL
+		 */
+        private void ApplyActionRTL()
+        {
+            m_modesVehicle.value = 6;
+            int typeMode = INDEXES_MODES[m_modesVehicle.value];
+            DroneKitAndroidController.Instance.SetModeOperation(typeMode);
+        }
+
+        // -------------------------------------------
+        /* 
+		 * ApplyActionLand
+		 */
+        private void ApplyActionLand()
+        {
+            m_modesVehicle.value = 8;
+            int typeMode = INDEXES_MODES[m_modesVehicle.value];
+            DroneKitAndroidController.Instance.SetModeOperation(typeMode);
         }
 
         // -------------------------------------------

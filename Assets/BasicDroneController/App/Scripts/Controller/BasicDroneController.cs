@@ -47,6 +47,8 @@ namespace BasicDroneController
         private float m_speed = 5f;
         private float m_time = 5f;
         private float m_height = 10f;
+        private int m_port = 14550;
+        private string m_ipDrone = "192.168.0.21";
 
         // ----------------------------------------------
         // GETTERS
@@ -66,6 +68,17 @@ namespace BasicDroneController
             get { return m_height; }
             set { m_height = value; }
         }
+        public int Port
+        {
+            get { return m_port; }
+            set { m_port = value; }
+        }
+        public string IPDrone
+        {
+            get { return m_ipDrone; }
+            set { m_ipDrone = value; }
+        }
+        
 
         // -------------------------------------------
         /* 

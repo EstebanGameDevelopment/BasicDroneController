@@ -70,6 +70,7 @@ public class ControlDroneDronekit  extends Activity implements DroneListener, To
 
     private ControlTower controlTower;
 
+    private String ipDrone = "";
     private int portNumber = 14550;
     private float heightDroneTakeOff = 1.5f;
     private Drone drone;
@@ -84,8 +85,9 @@ public class ControlDroneDronekit  extends Activity implements DroneListener, To
 
     private int eventDrone = -2;
 
-    public void initControlDrone(int _portNumber, float _heightDroneTakeOff) {
+    public void initControlDrone(String _ipDrone, int _portNumber, float _heightDroneTakeOff) {
 
+        ipDrone = _ipDrone;
         portNumber = _portNumber;
         heightDroneTakeOff = _heightDroneTakeOff;
 
@@ -329,6 +331,7 @@ public class ControlDroneDronekit  extends Activity implements DroneListener, To
     public boolean connectDrone() {
         if (!getConnectedDrone()) {
             ConnectionParameter connectionParams = ConnectionParameter.newUdpConnection(portNumber, null);
+            // ConnectionParameter connectionParams = ConnectionParameter.newTcpConnection(ipDrone, portNumber, null);
             this.drone.connect(connectionParams);
             return true;
         }
@@ -350,6 +353,9 @@ public class ControlDroneDronekit  extends Activity implements DroneListener, To
     }
 
     public boolean armDrone() {
+        System.out.println("++DRONE++ ARM DRONE --STEP 0--");
+        System.out.println("++DRONE++ ARM DRONE:getConnectedDrone()="+getConnectedDrone());
+        System.out.println("++DRONE++ ARM DRONE:getArmedDrone()="+getArmedDrone());
         if (getConnectedDrone() && !getArmedDrone()){
             // Connected but not Armed
             VehicleApi.getApi(this.drone).arm(true);
