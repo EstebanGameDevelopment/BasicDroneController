@@ -217,12 +217,20 @@ namespace BasicDroneController
 
                 case Operations.TAKEOFF:
                     m_buttonOperation.SetActive(false);
+#if ENABLE_DRONEANDROIDCONTROLLER
                     DroneKitAndroidController.Instance.TakeOffDrone();
+#elif ENABLE_WEBSOCKET_DRONEKIT
+                    WebSocketDroneKitController.Instance.TakeOffDrone((int)BasicDroneController.Instance.Height);
+#endif
                     break;
 
                 case Operations.LAND:
                     m_buttonOperation.SetActive(false);
+#if ENABLE_DRONEANDROIDCONTROLLER
                     DroneKitAndroidController.Instance.LandDrone();
+#elif ENABLE_WEBSOCKET_DRONEKIT
+                    WebSocketDroneKitController.Instance.LandDrone();
+#endif
                     break;
             }
         }
@@ -244,7 +252,11 @@ namespace BasicDroneController
         {
             BasicDroneController.Instance.Height = float.Parse(m_heightInput.text);
             m_applyHeight.SetActive(false);
+#if ENABLE_DRONEANDROIDCONTROLLER
             DroneKitAndroidController.Instance.ChangeAltitude(BasicDroneController.Instance.Height);
+#elif ENABLE_WEBSOCKET_DRONEKIT
+            WebSocketDroneKitController.Instance.ChangeAltitude(BasicDroneController.Instance.Height);
+#endif
         }
 
         // -------------------------------------------
@@ -302,7 +314,11 @@ namespace BasicDroneController
         private void ApplyVehicleMode()
         {
             int typeMode = INDEXES_MODES[m_modesVehicle.value];
+#if ENABLE_DRONEANDROIDCONTROLLER
             DroneKitAndroidController.Instance.SetModeOperation(typeMode);
+#elif ENABLE_WEBSOCKET_DRONEKIT
+            WebSocketDroneKitController.Instance.SetModeOperation(OPERATION_MODES[m_modesVehicle.value]);
+#endif
             m_applyVehicleMode.SetActive(false);
             m_ignoreUpdate = false;
         }
@@ -354,7 +370,11 @@ namespace BasicDroneController
         {
             m_modesVehicle.value = 6;
             int typeMode = INDEXES_MODES[m_modesVehicle.value];
+#if ENABLE_DRONEANDROIDCONTROLLER
             DroneKitAndroidController.Instance.SetModeOperation(typeMode);
+#elif ENABLE_WEBSOCKET_DRONEKIT
+            WebSocketDroneKitController.Instance.SetModeOperation(OPERATION_MODES[m_modesVehicle.value]);
+#endif
         }
 
         // -------------------------------------------
@@ -365,7 +385,11 @@ namespace BasicDroneController
         {
             m_modesVehicle.value = 8;
             int typeMode = INDEXES_MODES[m_modesVehicle.value];
+#if ENABLE_DRONEANDROIDCONTROLLER
             DroneKitAndroidController.Instance.SetModeOperation(typeMode);
+#elif ENABLE_WEBSOCKET_DRONEKIT
+            WebSocketDroneKitController.Instance.SetModeOperation(OPERATION_MODES[m_modesVehicle.value]);
+#endif
         }
 
         // -------------------------------------------
@@ -484,10 +508,14 @@ namespace BasicDroneController
                 Vector2 forward = new Vector2(forwardSignal.x, forwardSignal.y);
                 m_vectorVelocity = forward * BasicDroneController.Instance.Speed;
 
+#if ENABLE_DRONEANDROIDCONTROLLER
                 if (DroneKitAndroidController.Instance.RunVelocity(m_vectorVelocity.x, 0, m_vectorVelocity.y, false, BasicDroneController.Instance.Time))
+#elif ENABLE_WEBSOCKET_DRONEKIT
+                if (WebSocketDroneKitController.Instance.RunVelocity(m_vectorVelocity.x, 0, m_vectorVelocity.y, false, BasicDroneController.Instance.Time))
+#endif
                 {
                     DestroyDotDirection(m_nextDotVelocity);
-                    DroneKitAndroidController.Instance.FlyDrone();
+                    BasicSystemEventController.Instance.DispatchBasicSystemEvent(DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_START_FLYING, BasicDroneController.Instance.Time, new Vector3(m_vectorVelocity.x, 0, m_vectorVelocity.y));
                 }
                 else
                 {
@@ -597,8 +625,10 @@ namespace BasicDroneController
 
 #if UNITY_EDITOR
             if (true)
-#else
+#elif ENABLE_DRONEANDROIDCONTROLLER
             if (DroneKitAndroidController.Instance.TakeoffAltitudeReached)
+#elif ENABLE_WEBSOCKET_DRONEKIT
+            if (WebSocketDroneKitController.Instance.TakeoffAltitudeReached)
 #endif
             {
                 if (m_pressedInArea)

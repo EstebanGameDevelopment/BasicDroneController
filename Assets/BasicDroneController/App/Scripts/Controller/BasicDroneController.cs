@@ -46,7 +46,7 @@ namespace BasicDroneController
         // ----------------------------------------------	
         private float m_speed = 5f;
         private float m_time = 5f;
-        private float m_height = 10f;
+        private float m_height = 1f;
         private int m_port = 14550;
         private string m_ipDrone = "192.168.0.21";
 
