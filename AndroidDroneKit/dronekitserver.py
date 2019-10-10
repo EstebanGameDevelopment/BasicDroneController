@@ -28,7 +28,7 @@ def message_received(client, server, message):
 			print "Target Altitude = ", aTargetAltitude
 			vehicle.simple_takeoff(aTargetAltitude)
 			while True:
-				print " Altitude: ", vehicle.location.global_relative_frame.alt 
+				print " Altitude: ", vehicle.location.global_relative_frame.alt
 				#Break and return from function just below target altitude.        
 				if vehicle.location.global_relative_frame.alt>=aTargetAltitude*0.95: 
 					print "Reached target altitude"
@@ -53,7 +53,7 @@ def message_received(client, server, message):
 			print "Velocity VZ ", vz
 			print "Total Time ", ttime
 			print "Total Speed ", tspeed
-			msg = vehicle.message_factory.set_position_target_local_ned_encode(0,0,0,mavutil.mavlink.MAV_FRAME_BODY_NED, 0b0000111111000111, 0, 0, 0, vx, vy, vz, 0, 0, 0, 0, 0)
+			msg = vehicle.message_factory.set_position_target_local_ned_encode(0,0,0,mavutil.mavlink.MAV_FRAME_BODY_NED, 0b0000111111000111, 0, 0, 0, vx, vz, vy, 0, 0, 0, 0, 0)
 			vehicle.send_mavlink(msg)
 			vehicle.flush()
 			server.send_message_to_all("velocity_processed")

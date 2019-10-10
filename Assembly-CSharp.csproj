@@ -154,6 +154,7 @@
     <Compile Include="Assets\BasicDroneController\Libraries\YourCommonTools\VR\ScrollRectVR.cs" />
     <None Include="Assets\BasicDroneController\App\Resources\Texts\Texts.xml" />
     <None Include="Assets\BasicDroneController\Libraries\YourCommonTools\DroneKit\Resources\dronekit_velocity.txt" />
+    <None Include="Assets\BasicDroneController\Libraries\YourCommonTools\DroneKit\Resources\dronekit_basics.txt" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>D:/YourVRExperience/BasicDroneController/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
     </Reference>
