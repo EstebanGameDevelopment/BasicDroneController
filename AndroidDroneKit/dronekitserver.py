@@ -4,7 +4,7 @@ from dronekit import connect, VehicleMode, LocationGlobalRelative
 import time
 from pymavlink import mavutil
 vehicle = connect('tcp:127.0.0.1:5760', wait_ready=True)
-vehicle.mode = VehicleMode("GUIDED_NOGPS")
+vehicle.mode = VehicleMode(4)
 print('Flight Controller Connected')
 
 def new_client(client, server):
@@ -25,7 +25,7 @@ def message_received(client, server, message):
 			print ('Take Off vehicle')
 			pos = message.find("takeOffDrone")
 			aTargetAltitude = int(message[pos+13:])
-			aTargetAltitude = vehicle.location.global_relative_frame.alt + aTargetAltitude
+			# aTargetAltitude = int(vehicle.location.global_relative_frame.alt) + aTargetAltitude
 			print "Target Altitude = ", aTargetAltitude
 			vehicle.simple_takeoff(aTargetAltitude)
 			while True:
@@ -61,14 +61,14 @@ def message_received(client, server, message):
 			print ('Velocity Processed')
 		if "RTLDrone" in message:
 			print ('RTL Request')
-			vehicle.mode = VehicleMode("RTL")
+			vehicle.mode = VehicleMode(6)
 			while not vehicle.landed:
 					time.sleep(1)
 			server.send_message_to_all("rtl_success")
 			print ('RTL Success')
 		if "landDrone" in message:
 			print ('Now Landing Drone')
-			vehicle.mode = VehicleMode("LAND")
+			vehicle.mode = VehicleMode(9)
 			while not vehicle.landed:
 					time.sleep(1)
 			server.send_message_to_all("landed_success")
@@ -82,7 +82,7 @@ def message_received(client, server, message):
 			print ('Disarming Success')
 		if "operationDrone" in message:
 			pos = message.find("operationDrone")
-			newVehicleMode = message[pos+15:]
+			newVehicleMode = int(message[pos+15:])
 			print ('New Operation Mode=' + newVehicleMode)
 			vehicle.mode = VehicleMode(newVehicleMode)
 			server.send_message_to_all("opdrone_success")

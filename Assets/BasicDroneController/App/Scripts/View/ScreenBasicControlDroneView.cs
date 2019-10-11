@@ -317,7 +317,7 @@ namespace BasicDroneController
 #if ENABLE_DRONEANDROIDCONTROLLER
             DroneKitAndroidController.Instance.SetModeOperation(typeMode);
 #elif ENABLE_WEBSOCKET_DRONEKIT
-            WebSocketDroneKitController.Instance.SetModeOperation(OPERATION_MODES[m_modesVehicle.value]);
+            WebSocketDroneKitController.Instance.SetModeOperation(INDEXES_MODES[m_modesVehicle.value]);
 #endif
             m_applyVehicleMode.SetActive(false);
             m_ignoreUpdate = false;
@@ -373,7 +373,7 @@ namespace BasicDroneController
 #if ENABLE_DRONEANDROIDCONTROLLER
             DroneKitAndroidController.Instance.SetModeOperation(typeMode);
 #elif ENABLE_WEBSOCKET_DRONEKIT
-            WebSocketDroneKitController.Instance.SetModeOperation(OPERATION_MODES[m_modesVehicle.value]);
+            WebSocketDroneKitController.Instance.SetModeOperation(INDEXES_MODES[m_modesVehicle.value]);
 #endif
         }
 
@@ -388,7 +388,7 @@ namespace BasicDroneController
 #if ENABLE_DRONEANDROIDCONTROLLER
             DroneKitAndroidController.Instance.SetModeOperation(typeMode);
 #elif ENABLE_WEBSOCKET_DRONEKIT
-            WebSocketDroneKitController.Instance.SetModeOperation(OPERATION_MODES[m_modesVehicle.value]);
+            WebSocketDroneKitController.Instance.SetModeOperation(INDEXES_MODES[m_modesVehicle.value]);
 #endif
         }
 
