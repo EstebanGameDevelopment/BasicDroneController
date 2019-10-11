@@ -4,7 +4,7 @@ from dronekit import connect, VehicleMode, LocationGlobalRelative
 import time
 from pymavlink import mavutil
 vehicle = connect('tcp:127.0.0.1:5760', wait_ready=True)
-vehicle.mode = VehicleMode("GUIDED")
+vehicle.mode = VehicleMode("GUIDED_NOGPS")
 print('Flight Controller Connected')
 
 def new_client(client, server):
@@ -25,12 +25,13 @@ def message_received(client, server, message):
 			print ('Take Off vehicle')
 			pos = message.find("takeOffDrone")
 			aTargetAltitude = int(message[pos+13:])
+			aTargetAltitude = vehicle.location.global_relative_frame.alt + aTargetAltitude
 			print "Target Altitude = ", aTargetAltitude
 			vehicle.simple_takeoff(aTargetAltitude)
 			while True:
 				print " Altitude: ", vehicle.location.global_relative_frame.alt
 				#Break and return from function just below target altitude.        
-				if vehicle.location.global_relative_frame.alt>=aTargetAltitude*0.95: 
+				if vehicle.location.global_relative_frame.alt>=aTargetAltitude: 
 					print "Reached target altitude"
 					break
 				time.sleep(1)
