@@ -72,6 +72,8 @@ namespace BasicDroneController
         private Operations m_operation;
 
         private GameObject m_buttonRTL;
+        private GameObject m_buttonLand;
+        private GameObject m_buttonDisarm;
 
         private Vector2 m_vectorVelocity = Vector2.zero;
 
@@ -150,6 +152,16 @@ namespace BasicDroneController
             m_buttonRTL.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.rtl");
             m_buttonRTL.GetComponent<Button>().onClick.AddListener(ApplyActionRTL);
             m_buttonRTL.SetActive(true);
+
+            m_buttonLand = m_container.Find("LAND").gameObject;
+            m_buttonLand.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.land");
+            m_buttonLand.GetComponent<Button>().onClick.AddListener(ApplyLand);
+            m_buttonLand.SetActive(true);
+            
+            m_buttonDisarm = m_container.Find("DISARM").gameObject;
+            m_buttonDisarm.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.disarm");
+            m_buttonDisarm.GetComponent<Button>().onClick.AddListener(ApplyDisarm);
+            m_buttonDisarm.SetActive(true);
 
             // VEHICLES MODES
             m_container.Find("Mode").gameObject.SetActive(false);
@@ -376,6 +388,35 @@ namespace BasicDroneController
             WebSocketDroneKitController.Instance.SetModeOperation(INDEXES_MODES[m_modesVehicle.value]);
 #endif
         }
+
+        // -------------------------------------------
+        /* 
+		 * ApplyLand
+		 */
+        private void ApplyLand()
+        {
+#if ENABLE_DRONEANDROIDCONTROLLER
+            // DroneKitAndroidController.Instance.SetModeOperation(typeMode);
+#elif ENABLE_WEBSOCKET_DRONEKIT
+            WebSocketDroneKitController.Instance.LandDrone();
+#endif
+        }
+
+        // -------------------------------------------
+        /* 
+		 * ApplyDisarm
+		 */
+        private void ApplyDisarm()
+        {
+#if ENABLE_DRONEANDROIDCONTROLLER
+            // DroneKitAndroidController.Instance.SetModeOperation(typeMode);
+#elif ENABLE_WEBSOCKET_DRONEKIT
+            WebSocketDroneKitController.Instance.DisarmDrone();
+#endif
+
+            BasicSystemEventController.Instance.DispatchBasicSystemEvent(DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_CONNECTED);
+        }
+        
 
         // -------------------------------------------
         /* 

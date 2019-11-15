@@ -63,6 +63,11 @@
     <es>RTL</es>
   </text>
 
+  <text id="message.disarm">
+    <en>DISARM</en>
+    <es>DISARM</es>
+  </text>
+
   <text id="message.ip.address">
     <en>IP Address</en>
     <es>IP Address</es>
