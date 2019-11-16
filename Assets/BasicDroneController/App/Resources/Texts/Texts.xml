@@ -13,6 +13,11 @@
     <es>Cancelar</es>
   </text>
 
+  <text id="message.working">
+    <en>Working</en>
+    <es>Working</es>
+  </text>
+
   <text id="message.error">
     <en>Error</en>
     <es>Error</es>

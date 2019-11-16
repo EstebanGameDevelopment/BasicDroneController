@@ -49,6 +49,7 @@ namespace BasicDroneController
 		private Transform m_container;
 
         private Text m_textDescription;
+        private Text m_working;
 
         private InputField m_speedInput;
         private GameObject m_applySpeed;
@@ -77,6 +78,9 @@ namespace BasicDroneController
 
         private Vector2 m_vectorVelocity = Vector2.zero;
 
+        private float m_isWorking = 0;
+        private float m_workingDots = 0;
+
         // RADAR AREA
         private GameObject m_radarArea;
         private RectTransform m_rectRadarArea;
@@ -99,6 +103,9 @@ namespace BasicDroneController
 			m_container = m_root.transform.Find("Content");
 
             m_container.Find("Title").GetComponent<Text>().text = LanguageController.Instance.GetText("message.game.title");
+
+            m_working = m_container.Find("Working").GetComponent<Text>();
+            m_working.text = "";
 
             m_textDescription = m_container.Find("Text").GetComponent<Text>();
             m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.1.connect");
@@ -206,6 +213,8 @@ namespace BasicDroneController
 		 */
         private void BasicOperation()
         {
+            if (m_isWorking > 0) return;
+
             switch (m_operation)
             {
                 case Operations.CONNECT:
@@ -225,6 +234,7 @@ namespace BasicDroneController
 #elif ENABLE_WEBSOCKET_DRONEKIT
                     WebSocketDroneKitController.Instance.ArmDrone();
 #endif
+                    m_isWorking = 2;
                     break;
 
                 case Operations.TAKEOFF:
@@ -234,6 +244,7 @@ namespace BasicDroneController
 #elif ENABLE_WEBSOCKET_DRONEKIT
                     WebSocketDroneKitController.Instance.TakeOffDrone((int)BasicDroneController.Instance.Height);
 #endif
+                    m_isWorking = 5;
                     break;
 
                 case Operations.LAND:
@@ -243,6 +254,7 @@ namespace BasicDroneController
 #elif ENABLE_WEBSOCKET_DRONEKIT
                     WebSocketDroneKitController.Instance.LandDrone();
 #endif
+                    m_isWorking = 10;
                     break;
             }
         }
@@ -387,6 +399,7 @@ namespace BasicDroneController
 #elif ENABLE_WEBSOCKET_DRONEKIT
             WebSocketDroneKitController.Instance.SetModeOperation(INDEXES_MODES[m_modesVehicle.value]);
 #endif
+            m_isWorking = 20;
         }
 
         // -------------------------------------------
@@ -400,6 +413,8 @@ namespace BasicDroneController
 #elif ENABLE_WEBSOCKET_DRONEKIT
             WebSocketDroneKitController.Instance.LandDrone();
 #endif
+
+            m_isWorking = 10;
         }
 
         // -------------------------------------------
@@ -414,6 +429,7 @@ namespace BasicDroneController
             WebSocketDroneKitController.Instance.DisarmDrone();
 #endif
 
+            m_isWorking = 2;
             BasicSystemEventController.Instance.DispatchBasicSystemEvent(DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_CONNECTED);
         }
         
@@ -431,6 +447,8 @@ namespace BasicDroneController
 #elif ENABLE_WEBSOCKET_DRONEKIT
             WebSocketDroneKitController.Instance.SetModeOperation(INDEXES_MODES[m_modesVehicle.value]);
 #endif
+
+            m_isWorking = 10;
         }
 
         // -------------------------------------------
@@ -521,9 +539,19 @@ namespace BasicDroneController
         }
 
         // -------------------------------------------
-        /* 
-		 * OnUIEvent
+        /*
+		 * ResetIsWorking
 		 */
+        private void ResetIsWorking()
+        {
+            m_isWorking = 0;
+            m_working.text = "";
+        }
+
+        // -------------------------------------------
+        /* 
+        * OnUIEvent
+        */
         private void OnUIEvent(string _nameEvent, params object[] _list)
 		{
 			if (_nameEvent == ScreenController.EVENT_CONFIRMATION_POPUP)
@@ -592,6 +620,7 @@ namespace BasicDroneController
             }
             if (_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_ARMED)
             {
+                ResetIsWorking();
                 m_operation = Operations.TAKEOFF;
                 m_buttonOperation.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.takeoff.drone");
                 m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.3.takeoff");
@@ -599,6 +628,7 @@ namespace BasicDroneController
             }
             if (_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_TAKEN_OFF)
             {
+                ResetIsWorking();
                 m_operation = Operations.LAND;
                 m_buttonOperation.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.land.drone");
                 m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.3.now.takingoff");
@@ -648,11 +678,16 @@ namespace BasicDroneController
             }
             if (_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_LANDED)
             {
+                ResetIsWorking();
                 m_operation = Operations.ARM;
                 m_buttonOperation.transform.Find("Text").GetComponent<Text>().text = LanguageController.Instance.GetText("message.arm.drone");
                 m_textDescription.text = LanguageController.Instance.GetText("message.basic.instructions.2.arm");
                 m_buttonOperation.SetActive(true);
                 m_container.Find("Mode").gameObject.SetActive(false);
+            }
+            if (_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_DISARMED)
+            {
+                ResetIsWorking();
             }
         }
 
@@ -663,6 +698,35 @@ namespace BasicDroneController
         void Update()
         {
             UpdateModeVehicle();
+
+            if (m_isWorking > 0)
+            {
+                m_working.text = LanguageController.Instance.GetText("message.working");
+                m_workingDots += Time.deltaTime;
+                if ((m_workingDots >= 0) && (m_workingDots < 0.3))
+                {
+                    m_working.text += ".";
+                }
+                if ((m_workingDots >= 0.3) && (m_workingDots < 0.6))
+                {
+                    m_working.text += "..";
+                }
+                if ((m_workingDots >= 0.6) && (m_workingDots < 0.9))
+                {
+                    m_working.text += "...";
+                }
+                if (m_workingDots >= 0.9)
+                {
+                    m_workingDots = 0;
+                }
+
+                m_isWorking -= Time.deltaTime;
+                if (m_isWorking < 0)
+                {
+                    m_working.text = "";
+                }
+            }
+            
 
 #if UNITY_EDITOR
             if (true)

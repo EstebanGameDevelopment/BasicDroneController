@@ -57,6 +57,7 @@ def message_received(client, server, message):
 				set_attitude(thrust = thrust)
 				time.sleep(0.2)
 			print ('Take Off Success')
+			server.send_message_to_all("altitude_success")
 		if "Velocity" in message:
 			posvx = message.find("_vx_")
 			posvy = message.find("_vy_")
@@ -94,7 +95,7 @@ def message_received(client, server, message):
 			print ('Now Landing Drone')
 			vehicle.mode = VehicleMode("LAND")
 			vehicle.flush()
-			counter = 5
+			counter = 10
 			while not vehicle.commands.next > 0 and counter > 0:
 				counter = counter - 1
 				print "Counter: ", counter
