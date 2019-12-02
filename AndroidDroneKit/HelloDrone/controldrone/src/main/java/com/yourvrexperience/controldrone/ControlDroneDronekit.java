@@ -367,6 +367,21 @@ public class ControlDroneDronekit  extends Activity implements DroneListener, To
         }
     }
 
+    public boolean disarmDrone() {
+        System.out.println("++DRONE++ DISARM DRONE --STEP 0--");
+        System.out.println("++DRONE++ DISARM DRONE:getConnectedDrone()="+getConnectedDrone());
+        System.out.println("++DRONE++ DISARM DRONE:getArmedDrone()="+getArmedDrone());
+        if (getConnectedDrone() && getArmedDrone()){
+            // Connected but not Armed
+            VehicleApi.getApi(this.drone).arm(false);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     public boolean takeOffDrone() {
         takeOffState = -2;
         if (getArmedDrone() && !getFlyingDrone()) {

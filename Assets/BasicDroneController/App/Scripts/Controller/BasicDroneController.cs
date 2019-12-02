@@ -11,6 +11,9 @@ namespace BasicDroneController
 	 * BasicDroneController
 	 * 
 	 * ScreenManager controller that handles basic drone operations
+     * 
+     * cd ardupilot/ArduCopter/
+     * sim_vehicle.py -L 3DRBerkeley --map --console --out 192.168.0.23:14550
 	 * 
 	 * @author Esteban Gallardo
 	 */
@@ -71,6 +74,9 @@ namespace BasicDroneController
             set {
                 m_previousHeight = m_height;
                 m_height = value;
+#if ENABLE_DRONEANDROIDCONTROLLER
+                DroneKitAndroidController.Instance.HeightTakeOff = m_height;
+#endif
             }
         }
         public float PreviousHeight
@@ -87,7 +93,6 @@ namespace BasicDroneController
             get { return m_ipDrone; }
             set { m_ipDrone = value; }
         }
-        
 
         // -------------------------------------------
         /* 

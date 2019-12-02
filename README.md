@@ -1,3 +1,8 @@
+RUN SIMULATOR
+-------------
+cd ardupilot/ArduCopter/
+sim_vehicle.py -L 3DRBerkeley --map --console --out 192.168.0.23:14550
+
 DRONE CONTROLLER
 ----------------
 

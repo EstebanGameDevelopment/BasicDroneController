@@ -459,8 +459,10 @@ namespace BasicDroneController
 		 */
         private void ApplyLand()
         {
+            m_modesVehicle.value = 8;
+            int typeMode = INDEXES_MODES[m_modesVehicle.value];
 #if ENABLE_DRONEANDROIDCONTROLLER
-            // DroneKitAndroidController.Instance.SetModeOperation(typeMode);
+            DroneKitAndroidController.Instance.SetModeOperation(typeMode);
 #elif ENABLE_WEBSOCKET_DRONEKIT
             WebSocketDroneKitController.Instance.LandDrone();
 #elif ENABLE_DRONEUDPSOCKET
@@ -477,7 +479,7 @@ namespace BasicDroneController
         private void ApplyDisarm()
         {
 #if ENABLE_DRONEANDROIDCONTROLLER
-            // DroneKitAndroidController.Instance.SetModeOperation(typeMode);
+            DroneKitAndroidController.Instance.DisarmDrone();
 #elif ENABLE_WEBSOCKET_DRONEKIT
             WebSocketDroneKitController.Instance.DisarmDrone();
 #elif ENABLE_DRONEUDPSOCKET
@@ -651,7 +653,7 @@ namespace BasicDroneController
                 m_vectorVelocity = forward * BasicDroneController.Instance.Speed;
 
 #if ENABLE_DRONEANDROIDCONTROLLER
-                if (DroneKitAndroidController.Instance.RunVelocity(m_vectorVelocity.x, 0, m_vectorVelocity.y, false, BasicDroneController.Instance.Time))
+                if (DroneKitAndroidController.Instance.RunVelocity(m_vectorVelocity.x, 0, m_vectorVelocity.y, true, BasicDroneController.Instance.Time))
 #elif ENABLE_WEBSOCKET_DRONEKIT
                 if (WebSocketDroneKitController.Instance.RunVelocity(m_vectorVelocity.x, 0, m_vectorVelocity.y, false, BasicDroneController.Instance.Time))
 #elif ENABLE_DRONEUDPSOCKET
