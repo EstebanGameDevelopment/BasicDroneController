@@ -47,6 +47,7 @@ namespace BasicDroneController
         private float m_speed = 2f;
         private float m_time = 5f;
         private float m_height = 1f;
+        private float m_previousHeight = 1f;
         private int m_port = 14550;
         private string m_ipDrone = "192.168.0.23";
         // private string m_ipDrone = "192.168.43.107";
@@ -67,7 +68,14 @@ namespace BasicDroneController
         public float Height
         {
             get { return m_height; }
-            set { m_height = value; }
+            set {
+                m_previousHeight = m_height;
+                m_height = value;
+            }
+        }
+        public float PreviousHeight
+        {
+            get { return m_previousHeight; }
         }
         public int Port
         {

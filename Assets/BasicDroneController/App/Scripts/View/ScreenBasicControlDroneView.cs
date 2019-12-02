@@ -93,6 +93,11 @@ namespace BasicDroneController
         private GameObject m_currentDotVelocity;
         private GameObject m_nextDotVelocity;
 
+        // TELLO UDP SOCKET
+        private bool m_requestChangeHeight = false;
+        private bool m_requestLanding = false;
+        private bool m_requestGoTo = false;
+
         // -------------------------------------------
         /* 
 		 * Constructor
@@ -224,6 +229,10 @@ namespace BasicDroneController
                     DroneKitAndroidController.Instance.Initialitzation(false, BasicDroneController.Instance.IPDrone, BasicDroneController.Instance.Port, BasicDroneController.Instance.Height);
 #elif ENABLE_WEBSOCKET_DRONEKIT
                     WebSocketDroneKitController.Instance.Connect(BasicDroneController.Instance.IPDrone + ":8080" );
+#elif ENABLE_DRONEUDPSOCKET
+                    DroneUDPSendController.Instance.Init(BasicDroneController.Instance.IPDrone, 8889);
+                    DroneUDPReceiveController.Instance.Init(8889);
+                    BasicSystemEventController.Instance.DispatchBasicSystemEvent(DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_CONNECTED);
 #endif
                     break;
 
@@ -233,6 +242,8 @@ namespace BasicDroneController
                     DroneKitAndroidController.Instance.ArmDrone();
 #elif ENABLE_WEBSOCKET_DRONEKIT
                     WebSocketDroneKitController.Instance.ArmDrone();
+#elif ENABLE_DRONEUDPSOCKET
+                    DroneUDPSendController.Instance.SendMessage("command");
 #endif
                     m_isWorking = 2;
                     break;
@@ -243,6 +254,8 @@ namespace BasicDroneController
                     DroneKitAndroidController.Instance.TakeOffDrone();
 #elif ENABLE_WEBSOCKET_DRONEKIT
                     WebSocketDroneKitController.Instance.TakeOffDrone((int)BasicDroneController.Instance.Height);
+#elif ENABLE_DRONEUDPSOCKET
+                    DroneUDPSendController.Instance.SendMessage("takeoff");
 #endif
                     m_isWorking = 5;
                     break;
@@ -253,6 +266,8 @@ namespace BasicDroneController
                     DroneKitAndroidController.Instance.LandDrone();
 #elif ENABLE_WEBSOCKET_DRONEKIT
                     WebSocketDroneKitController.Instance.LandDrone();
+#elif ENABLE_DRONEUDPSOCKET
+                    DroneUDPSendController.Instance.SendMessage("land");
 #endif
                     m_isWorking = 10;
                     break;
@@ -280,6 +295,23 @@ namespace BasicDroneController
             DroneKitAndroidController.Instance.ChangeAltitude(BasicDroneController.Instance.Height);
 #elif ENABLE_WEBSOCKET_DRONEKIT
             WebSocketDroneKitController.Instance.ChangeAltitude(BasicDroneController.Instance.Height);
+#elif ENABLE_DRONEUDPSOCKET
+            if (m_operation == Operations.LAND)
+            {
+                if (!m_requestChangeHeight)
+                {
+                    m_requestChangeHeight = true;
+                    int shiftHeight = (int)(BasicDroneController.Instance.Height - BasicDroneController.Instance.PreviousHeight);
+                    if (shiftHeight > 0)
+                    {
+                        DroneUDPSendController.Instance.SendMessage("up " + shiftHeight);
+                    }
+                    else
+                    {
+                        DroneUDPSendController.Instance.SendMessage("down " + (-shiftHeight));
+                    }
+                }
+            }
 #endif
         }
 
@@ -342,6 +374,8 @@ namespace BasicDroneController
             DroneKitAndroidController.Instance.SetModeOperation(typeMode);
 #elif ENABLE_WEBSOCKET_DRONEKIT
             WebSocketDroneKitController.Instance.SetModeOperation(INDEXES_MODES[m_modesVehicle.value]);
+#elif ENABLE_DRONEUDPSOCKET
+            
 #endif
             m_applyVehicleMode.SetActive(false);
             m_ignoreUpdate = false;
@@ -385,6 +419,21 @@ namespace BasicDroneController
             m_applyIPAddress.SetActive(false);
         }
 
+        // -------------------------------------------
+        /* 
+		 * TelloLandDrone
+		 */
+        private void TelloLandDrone()
+        {
+            if (m_operation == Operations.LAND)
+            {
+                if (!m_requestLanding)
+                {
+                    m_requestLanding = true;
+                    DroneUDPSendController.Instance.SendMessage("land");
+                }
+            }
+        }
 
         // -------------------------------------------
         /* 
@@ -398,6 +447,8 @@ namespace BasicDroneController
             DroneKitAndroidController.Instance.SetModeOperation(typeMode);
 #elif ENABLE_WEBSOCKET_DRONEKIT
             WebSocketDroneKitController.Instance.SetModeOperation(INDEXES_MODES[m_modesVehicle.value]);
+#elif ENABLE_DRONEUDPSOCKET
+            TelloLandDrone();
 #endif
             m_isWorking = 20;
         }
@@ -412,6 +463,8 @@ namespace BasicDroneController
             // DroneKitAndroidController.Instance.SetModeOperation(typeMode);
 #elif ENABLE_WEBSOCKET_DRONEKIT
             WebSocketDroneKitController.Instance.LandDrone();
+#elif ENABLE_DRONEUDPSOCKET
+            TelloLandDrone();
 #endif
 
             m_isWorking = 10;
@@ -427,6 +480,8 @@ namespace BasicDroneController
             // DroneKitAndroidController.Instance.SetModeOperation(typeMode);
 #elif ENABLE_WEBSOCKET_DRONEKIT
             WebSocketDroneKitController.Instance.DisarmDrone();
+#elif ENABLE_DRONEUDPSOCKET
+            TelloLandDrone();
 #endif
 
             m_isWorking = 2;
@@ -446,6 +501,8 @@ namespace BasicDroneController
             DroneKitAndroidController.Instance.SetModeOperation(typeMode);
 #elif ENABLE_WEBSOCKET_DRONEKIT
             WebSocketDroneKitController.Instance.SetModeOperation(INDEXES_MODES[m_modesVehicle.value]);
+#elif ENABLE_DRONEUDPSOCKET
+            TelloLandDrone();
 #endif
 
             m_isWorking = 10;
@@ -549,6 +606,22 @@ namespace BasicDroneController
         }
 
         // -------------------------------------------
+        /*
+		 * TelloGoTo
+		 */
+        private bool TelloGoTo(Vector2 _direction, float _distanceWithTime)
+        {
+            if (!m_requestGoTo)
+            {
+                m_requestGoTo = true;
+                Vector2 target = _direction * _distanceWithTime;
+                DroneUDPSendController.Instance.SendMessage("go " + target.x + " 0 " + target.y + " 100");
+                return true;
+            }
+            return false;
+        }
+
+        // -------------------------------------------
         /* 
         * OnUIEvent
         */
@@ -581,6 +654,8 @@ namespace BasicDroneController
                 if (DroneKitAndroidController.Instance.RunVelocity(m_vectorVelocity.x, 0, m_vectorVelocity.y, false, BasicDroneController.Instance.Time))
 #elif ENABLE_WEBSOCKET_DRONEKIT
                 if (WebSocketDroneKitController.Instance.RunVelocity(m_vectorVelocity.x, 0, m_vectorVelocity.y, false, BasicDroneController.Instance.Time))
+#elif ENABLE_DRONEUDPSOCKET
+                if (TelloGoTo(forward, BasicDroneController.Instance.Time))
 #endif
                 {
                     DestroyDotDirection(m_nextDotVelocity);
@@ -600,6 +675,45 @@ namespace BasicDroneController
 		 */
         private void OnBasicSystemEvent(string _nameEvent, object[] _list)
         {
+#if ENABLE_DRONEUDPSOCKET
+            if (_nameEvent == DroneUDPReceiveController.EVENT_DRONEUDPSOCKET_RECEIVED_MESSAGE)
+            {
+                if (((string)_list[0]).ToUpper().IndexOf("OK") != -1)
+                {
+                    switch (m_operation)
+                    {
+                        case Operations.CONNECT:
+                            break;
+
+                        case Operations.ARM:
+                            BasicSystemEventController.Instance.DelayBasicSystemEvent(DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_ARMED, 0.1f);
+                            break;
+
+                        case Operations.TAKEOFF:
+                            BasicSystemEventController.Instance.DelayBasicSystemEvent(DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_TAKEN_OFF, 0.1f);
+                            break;
+
+                        case Operations.LAND:
+                            if (m_requestChangeHeight)
+                            {
+                                m_requestChangeHeight = false;
+                            }
+                            else if (m_requestGoTo)
+                            {
+                                m_requestGoTo = false;
+                            }
+                            else if (m_requestLanding)
+                            {
+                                m_requestLanding = false;
+                                BasicSystemEventController.Instance.DelayBasicSystemEvent(DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_LANDED, 0.1f);
+                            } 
+                            break;
+                    }
+                }
+                return;
+            }
+#endif
+
             if (_nameEvent == DroneKitAndroidController.EVENT_DRONEKITCONTROLLER_DISCONNECTED)
             {
                 m_operation = Operations.CONNECT;
@@ -727,13 +841,14 @@ namespace BasicDroneController
                 }
             }
             
-
 #if UNITY_EDITOR
             if (true)
 #elif ENABLE_DRONEANDROIDCONTROLLER
             if (DroneKitAndroidController.Instance.TakeoffAltitudeReached)
 #elif ENABLE_WEBSOCKET_DRONEKIT
             if (WebSocketDroneKitController.Instance.TakeoffAltitudeReached)
+#elif ENABLE_DRONEUDPSOCKET
+            if (m_operations == Operations.LAND)
 #endif
             {
                 if (m_pressedInArea)

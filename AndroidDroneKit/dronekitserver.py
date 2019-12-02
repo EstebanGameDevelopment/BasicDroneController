@@ -30,32 +30,32 @@ def message_received(client, server, message):
 			aTargetAltitude = float(message[pos+13:])
 			# aTargetAltitude = int(vehicle.location.global_relative_frame.alt) + aTargetAltitude
 			print "Target Altitude = ", aTargetAltitude
-			# vehicle.simple_takeoff(aTargetAltitude)
-			# vehicle.flush()
-			# counter = 0
-			# while counter < 5:
-			# 	counter = counter + 1
-			# 	print " Altitude: ", vehicle.location.global_relative_frame.alt
-			# 	#Break and return from function just below target altitude.        
-			# 	if vehicle.location.global_relative_frame.alt>=aTargetAltitude: 
-			# 		print "Reached target altitude"
-			# 		break
-			# 	time.sleep(1)
-			# server.send_message_to_all("altitude_success")
-			SMOOTH_TAKEOFF_THRUST = 0.6
-			thrust = SMOOTH_TAKEOFF_THRUST
+			vehicle.simple_takeoff(aTargetAltitude)
+			vehicle.flush()
 			counter = 0
-			while counter < 25:
+			while counter < 10:
 				counter = counter + 1
-				current_altitude = vehicle.location.global_relative_frame.alt
-				print "Altitude:", current_altitude
-				if current_altitude >= aTargetAltitude*0.95: # Trigger just below target alt.
-					print("Reached target altitude")
-					break
-				elif current_altitude >= aTargetAltitude*0.6:
-					thrust = SMOOTH_TAKEOFF_THRUST
-				set_attitude(thrust = thrust)
-				time.sleep(0.2)
+			 	print " Altitude: ", vehicle.location.global_relative_frame.alt
+			 	#Break and return from function just below target altitude.        
+			 	if vehicle.location.global_relative_frame.alt>=aTargetAltitude: 
+			 		print "Reached target altitude"
+			 		break
+			 	time.sleep(0.5)
+			# +++ SENDING THRUST +++
+			#SMOOTH_TAKEOFF_THRUST = 0.6
+			#thrust = SMOOTH_TAKEOFF_THRUST
+			#counter = 0
+			#while counter < 25:
+			#	counter = counter + 1
+			#	current_altitude = vehicle.location.global_relative_frame.alt
+			#	print "Altitude:", current_altitude
+			#	if current_altitude >= aTargetAltitude*0.95: # Trigger just below target alt.
+			#		print("Reached target altitude")
+			#		break
+			#	elif current_altitude >= aTargetAltitude*0.6:
+			#		thrust = SMOOTH_TAKEOFF_THRUST
+			#	set_attitude(thrust = thrust)
+			#	time.sleep(0.2)
 			print ('Take Off Success')
 			server.send_message_to_all("altitude_success")
 		if "Velocity" in message:
@@ -99,7 +99,7 @@ def message_received(client, server, message):
 			while not vehicle.commands.next > 0 and counter > 0:
 				counter = counter - 1
 				print "Counter: ", counter
-				time.sleep(1)
+				time.sleep(0.5)
 			server.send_message_to_all("landed_success")
 			print ('Landing Success')
 		if "disconnectDrone" in message:
